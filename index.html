@@ -2,612 +2,1335 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Jal Nasser | Personal Journey Tracker</title>
-    <!-- Bootstrap 5 + Icons + Fonts -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Journey Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            font-family: 'Inter', sans-serif;
+        :root {
+            --sage: #4a7c59;
+            --sage-light: #e8f2eb;
+            --sage-mid: #b5d4bc;
+            --amber: #c17f3b;
+            --amber-light: #fdf3e7;
+            --clay: #b85c38;
+            --clay-light: #fbeee9;
+            --stone: #6b7280;
+            --stone-light: #f3f4f6;
+            --ink: #1c2b2d;
+            --parchment: #faf7f2;
+            --parchment-dark: #f0ebe2;
+            --white: #ffffff;
+            --shadow: rgba(28,43,45,0.12);
+            --radius: 1.5rem;
+            --radius-sm: 0.75rem;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--parchment);
             min-height: 100vh;
-            background-size: cover;
-            background-position: center center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            position: relative;
+            color: var(--ink);
         }
-        /* dark overlay for readability */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(2px);
-            z-index: -1;
-        }
-        /* main card container */
-        .tracker-wrapper {
-            background: rgba(255, 255, 255, 0.92);
-            border-radius: 2rem;
-            backdrop-filter: blur(2px);
-            box-shadow: 0 25px 45px rgba(0,0,0,0.2);
-            margin: 2rem 1rem;
+
+        /* ── SETUP SCREEN ── */
+        #setupScreen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--ink);
+            display: flex; align-items: center; justify-content: center;
             padding: 1.5rem;
+            transition: opacity 0.5s;
+        }
+        #setupScreen.fade-out { opacity: 0; pointer-events: none; }
+
+        .setup-bg {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 25% 35%, #2d4a35 0%, transparent 55%),
+                        radial-gradient(ellipse at 78% 68%, #3a2810 0%, transparent 50%),
+                        var(--ink);
+        }
+        .setup-panel {
+            position: relative; z-index: 1;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 2rem;
+            backdrop-filter: blur(12px);
+            padding: 2.5rem 2rem;
+            max-width: 420px; width: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 1.25rem;
+            text-align: center;
+        }
+        .setup-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; color: rgba(255,255,255,0.7);
+        }
+        .setup-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem; font-weight: 400;
+            color: rgba(255,255,255,0.92); line-height: 1.1;
+        }
+        .setup-sub {
+            font-size: 0.8rem; color: rgba(255,255,255,0.38);
+            letter-spacing: 0.05em; margin-top: -0.5rem;
+        }
+
+        /* tabs */
+        .auth-tabs {
+            display: flex; gap: 0; width: 100%;
+            background: rgba(255,255,255,0.06);
+            border-radius: 99px; padding: 3px;
+        }
+        .auth-tab {
+            flex: 1; padding: 0.5rem; border-radius: 99px;
+            border: none; background: transparent;
+            color: rgba(255,255,255,0.45); font-family: 'DM Sans',sans-serif;
+            font-size: 0.8rem; font-weight: 500; cursor: pointer;
             transition: all 0.2s;
         }
-        @media (min-width: 768px) {
-            .tracker-wrapper {
-                margin: 2rem auto;
-                max-width: 1100px;
-                padding: 2rem;
-            }
+        .auth-tab.active {
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.9);
         }
-        .user-header {
-            border-left: 5px solid #2b7a4b;
-            background: #f8f9fc;
-            padding: 1rem 1.5rem;
-            border-radius: 1.5rem;
-            margin-bottom: 1.8rem;
+
+        .auth-form { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; }
+        .auth-input {
+            width: 100%; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--radius-sm);
+            color: rgba(255,255,255,0.9);
+            font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+            outline: none; transition: border-color 0.2s;
         }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin-top: 1rem;
+        .auth-input::placeholder { color: rgba(255,255,255,0.25); }
+        .auth-input:focus { border-color: rgba(74,124,89,0.6); }
+        .auth-btn {
+            width: 100%; padding: 0.8rem;
+            background: rgba(74,124,89,0.5);
+            border: 1px solid rgba(74,124,89,0.5);
+            border-radius: var(--radius-sm);
+            color: rgba(255,255,255,0.9); font-family: 'DM Sans',sans-serif;
+            font-size: 0.9rem; font-weight: 500;
+            cursor: pointer; transition: all 0.2s;
         }
-        .weekday {
-            font-weight: 700;
+        .auth-btn:hover { background: rgba(74,124,89,0.7); }
+        .auth-err {
+            font-size: 0.75rem; color: #ef8a8a; min-height: 1.1rem;
             text-align: center;
-            font-size: 0.85rem;
-            padding: 8px 0;
-            background: #e9ecef;
-            border-radius: 40px;
-            color: #2c3e66;
+        }
+        .auth-success {
+            font-size: 0.75rem; color: #86efac; min-height: 1.1rem;
+            text-align: center;
+        }
+        .auth-divider {
+            width: 100%; text-align: center;
+            font-size: 0.7rem; color: rgba(255,255,255,0.2);
+            letter-spacing: 0.08em; position: relative;
+        }
+        .auth-divider::before, .auth-divider::after {
+            content: ''; position: absolute; top: 50%;
+            width: 40%; height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+        .auth-divider::before { left: 0; }
+        .auth-divider::after { right: 0; }
+
+        /* ── PIN SCREEN ── */
+        #pinScreen {
+            position: fixed; inset: 0; z-index: 9998;
+            background: var(--ink);
+            display: none;
+            align-items: center; justify-content: center;
+            padding: 1.5rem;
+            transition: opacity 0.4s;
+        }
+        #pinScreen.visible { display: flex; }
+        #pinScreen.fade-out { opacity: 0; pointer-events: none; }
+        .pin-panel {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 1.25rem;
+            text-align: center; max-width: 300px; width: 100%;
+        }
+        .pin-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem; font-weight: 400;
+            color: rgba(255,255,255,0.9);
+        }
+        .pin-hint { font-size: 0.78rem; color: rgba(255,255,255,0.35); }
+        .pin-dots {
+            display: flex; gap: 0.75rem;
+        }
+        .pin-dot {
+            width: 13px; height: 13px; border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            background: transparent; transition: all 0.18s;
+        }
+        .pin-dot.filled {
+            background: rgba(255,255,255,0.8);
+            border-color: rgba(255,255,255,0.8);
+            transform: scale(1.15);
+        }
+        .pin-pad {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 0.65rem; width: 240px;
+        }
+        .pin-key {
+            aspect-ratio: 1; border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.85);
+            font-size: 1.25rem; font-family: 'DM Sans',sans-serif;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; -webkit-user-select: none; user-select: none;
+        }
+        .pin-key:hover { background: rgba(255,255,255,0.14); transform: scale(1.05); }
+        .pin-key:active { transform: scale(0.93); }
+        .pin-key.enter { background: rgba(74,124,89,0.35); border-color: rgba(74,124,89,0.5); }
+        .pin-err { font-size: 0.75rem; color: #ef8a8a; min-height: 1.1rem; }
+        .sign-out-link {
+            font-size: 0.73rem; color: rgba(255,255,255,0.25);
+            cursor: pointer; text-decoration: underline;
+            transition: color 0.2s;
+        }
+        .sign-out-link:hover { color: rgba(255,255,255,0.5); }
+
+        /* ── SYNC INDICATOR ── */
+        .sync-badge {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            font-size: 0.7rem; color: var(--stone); padding: 0.25rem 0.7rem;
+            background: var(--stone-light); border-radius: 99px;
+        }
+        .sync-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--sage);
+        }
+        .sync-dot.syncing { background: var(--amber); animation: pulse 1s infinite; }
+        .sync-dot.error { background: var(--clay); }
+
+        /* ── APP SHELL ── */
+        .app-bg {
+            position: fixed; inset: 0; z-index: 0;
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+        .app-bg::after {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(250,247,242,0.83); backdrop-filter: blur(1px);
+        }
+        .app-wrapper {
+            position: relative; z-index: 1;
+            max-width: 1060px; margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+        }
+
+        /* ── HEADER ── */
+        .app-header {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1rem;
+            padding: 1.25rem 1.75rem;
+            background: white; border-radius: var(--radius);
+            box-shadow: 0 4px 24px var(--shadow);
+            margin-bottom: 1.25rem;
+        }
+        .header-left { display: flex; align-items: center; gap: 0.9rem; }
+        .avatar-wrap {
+            width: 48px; height: 48px; border-radius: 50%;
+            overflow: hidden; cursor: pointer;
+            border: 2px solid var(--sage-mid);
+            flex-shrink: 0; transition: transform 0.2s;
+        }
+        .avatar-wrap:hover { transform: scale(1.06); }
+        .avatar-wrap img, .avatar-wrap .avatar-ph {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .avatar-ph {
+            background: var(--sage-light);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--sage); font-size: 1.2rem;
+        }
+        .header-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.65rem; font-weight: 500;
+            color: var(--ink); line-height: 1;
+        }
+        .header-tagline { font-size: 0.74rem; color: var(--stone); margin-top: 3px; }
+        .header-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+        .btn-pill {
+            padding: 0.42rem 1rem; border-radius: 99px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.75rem; font-weight: 500;
+            cursor: pointer; border: 1.5px solid transparent;
+            transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem;
+            white-space: nowrap;
+        }
+        .btn-sage { background: var(--sage); color: white; border-color: var(--sage); }
+        .btn-sage:hover { background: #3a6347; }
+        .btn-outline { background: white; color: var(--ink); border-color: #d1d5db; }
+        .btn-outline:hover { background: var(--stone-light); }
+        .btn-clay-outline { background: white; color: var(--clay); border-color: #f3c4b4; }
+        .btn-clay-outline:hover { background: var(--clay-light); }
+
+        /* ── STATS ── */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+            gap: 0.65rem; margin-bottom: 1.25rem;
+        }
+        .stat-card {
+            background: white; border-radius: var(--radius-sm);
+            padding: 0.9rem 1.1rem;
+            box-shadow: 0 2px 12px var(--shadow);
+        }
+        .stat-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.9rem; font-weight: 600; line-height: 1;
+        }
+        .stat-label { font-size: 0.68rem; color: var(--stone); letter-spacing: 0.04em; text-transform: uppercase; margin-top: 2px; }
+        .stat-good .stat-val { color: var(--sage); }
+        .stat-slipped .stat-val { color: var(--amber); }
+        .stat-skipped .stat-val { color: var(--clay); }
+
+        /* ── CALENDAR ── */
+        .calendar-card {
+            background: white; border-radius: var(--radius);
+            padding: 1.5rem; box-shadow: 0 4px 24px var(--shadow);
+            margin-bottom: 1.25rem;
+        }
+        .cal-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.1rem;
+        }
+        .month-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem; font-weight: 500; color: var(--ink);
+        }
+        .nav-btns { display: flex; gap: 0.35rem; }
+        .nav-btn {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 1.5px solid #d1d5db; background: white;
+            color: var(--stone); cursor: pointer; font-size: 0.8rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: var(--sage-light); border-color: var(--sage-mid); color: var(--sage); }
+        .legend { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+        .legend-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.72rem; color: var(--stone); }
+        .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7,1fr);
+            gap: 5px;
+        }
+        .wday {
+            text-align: center; font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.07em; text-transform: uppercase;
+            color: var(--stone); padding: 5px 0;
         }
         .day-cell {
-            background: white;
-            border-radius: 20px;
-            padding: 12px 5px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
-            min-height: 85px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            border-radius: 12px; padding: 7px 3px 9px;
+            text-align: center; cursor: pointer; transition: all 0.18s;
+            min-height: 70px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 3px;
+            background: var(--stone-light);
+            border: 1.5px solid transparent;
         }
-        .day-cell:hover {
-            transform: translateY(-3px);
-            background: #fff6e0;
-            border-color: #cdb38c;
+        .day-cell:hover { transform: translateY(-2px); box-shadow: 0 5px 14px var(--shadow); }
+        .day-cell.empty { background: transparent; cursor: default; pointer-events: none; }
+        .day-cell.today { border-color: var(--sage); box-shadow: 0 0 0 2px var(--sage-light); }
+        .day-cell.future { opacity: 0.45; cursor: not-allowed; }
+        .day-cell.future:hover { transform: none; box-shadow: none; }
+        .day-cell.s-good { background: var(--sage-light); border-color: var(--sage-mid); }
+        .day-cell.s-slipped { background: var(--amber-light); border-color: #f0c080; }
+        .day-cell.s-skipped { background: var(--clay-light); border-color: #e8b09a; }
+        .day-num { font-size: 0.85rem; font-weight: 600; color: var(--ink); line-height: 1; }
+        .day-icon { font-size: 1.1rem; line-height: 1; }
+        .day-checks { display: flex; gap: 2px; justify-content: center; }
+        .cdot { width: 5px; height: 5px; border-radius: 50%; }
+
+        /* ── DAY MODAL ── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 500;
+            background: rgba(28,43,45,0.5);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.22s;
         }
-        .day-number {
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-            color: #1e2a47;
+        .modal-overlay.show { opacity: 1; pointer-events: all; }
+        .modal-card {
+            background: white; border-radius: var(--radius);
+            padding: 1.75rem; max-width: 460px; width: 100%;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+            transform: translateY(14px); transition: transform 0.22s;
+            max-height: 90vh; overflow-y: auto; position: relative;
         }
-        .status-icon {
-            font-size: 1.4rem;
+        .modal-overlay.show .modal-card { transform: translateY(0); }
+
+        .modal-badge {
+            display: inline-block; padding: 0.28rem 0.8rem;
+            background: var(--sage-light); color: var(--sage);
+            border-radius: 99px; font-size: 0.73rem; font-weight: 600;
+            margin-bottom: 1rem;
         }
-        .status-good {
-            background: #e0f2e9;
-            border-bottom: 3px solid #2b7a4b;
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem; font-weight: 500; color: var(--ink);
+            margin-bottom: 1.25rem;
         }
-        .status-slipped {
-            background: #fff3e0;
-            border-bottom: 3px solid #e67e22;
+        .sec-label {
+            font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--stone); margin-bottom: 0.6rem;
         }
-        .status-skipped {
-            background: #ffe8e8;
-            border-bottom: 3px solid #c0392b;
+        .status-group { display: flex; gap: 0.45rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+        .status-btn {
+            flex: 1; min-width: 76px; padding: 0.55rem 0.4rem;
+            border-radius: var(--radius-sm); border: 1.5px solid transparent;
+            font-family: 'DM Sans',sans-serif; font-size: 0.75rem; font-weight: 500;
+            cursor: pointer; transition: all 0.18s;
+            display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+            background: var(--stone-light); color: var(--stone);
         }
-        .status-none {
-            background: #f1f3f5;
-            border-bottom: 3px solid #adb5bd;
+        .status-btn i { font-size: 1rem; }
+        .status-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px var(--shadow); }
+        .status-btn.a-good { background: var(--sage-light); color: var(--sage); border-color: var(--sage); }
+        .status-btn.a-slipped { background: var(--amber-light); color: var(--amber); border-color: var(--amber); }
+        .status-btn.a-skipped { background: var(--clay-light); color: var(--clay); border-color: var(--clay); }
+
+        .habit-check {
+            display: flex; align-items: flex-start; gap: 0.65rem;
+            padding: 0.65rem 0.5rem; border-radius: var(--radius-sm);
+            cursor: pointer; transition: background 0.15s; margin-bottom: 0.3rem;
         }
-        .today-highlight {
-            background: #e3f2fd;
-            box-shadow: 0 0 0 2px #1e6f9f;
+        .habit-check:hover { background: var(--stone-light); }
+        .check-box {
+            width: 19px; height: 19px; border-radius: 5px;
+            border: 1.5px solid #d1d5db; background: white;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.6rem; flex-shrink: 0;
+            transition: all 0.18s; margin-top: 1px;
         }
-        .legend span {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border-radius: 30px;
-            margin-right: 6px;
-            vertical-align: middle;
+        .habit-check.checked .check-box { background: var(--sage); border-color: var(--sage); }
+        .habit-text { font-size: 0.82rem; line-height: 1.4; color: var(--ink); }
+
+        .tip-box {
+            background: var(--amber-light); border-radius: var(--radius-sm);
+            padding: 0.8rem 0.9rem; font-size: 0.76rem; color: #8a5a1a;
+            line-height: 1.5; border-left: 3px solid var(--amber);
+            margin: 1rem 0 1.25rem;
         }
-        .btn-photo {
-            background: #2c3e66;
-            color: white;
-            border-radius: 40px;
-            padding: 6px 16px;
-            font-size: 0.8rem;
+        .modal-foot {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 0.6rem; padding-top: 0.9rem;
+            border-top: 1px solid var(--parchment-dark);
         }
-        .btn-photo:hover {
-            background: #1f2c48;
-            color: white;
+        .close-x {
+            position: absolute; top: 1.1rem; right: 1.1rem;
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 1.5px solid #d1d5db; background: white;
+            color: var(--stone); cursor: pointer; font-size: 0.75rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.18s;
         }
-        footer {
+        .close-x:hover { background: var(--stone-light); }
+
+        /* ── SETTINGS MODAL ── */
+        .form-group { margin-bottom: 0.85rem; }
+        .form-label { font-size: 0.73rem; font-weight: 600; color: var(--stone); display: block; margin-bottom: 0.35rem; }
+        .form-input {
+            width: 100%; padding: 0.55rem 0.8rem;
+            border: 1.5px solid #e5e7eb; border-radius: var(--radius-sm);
+            font-family: 'DM Sans',sans-serif; font-size: 0.83rem;
+            color: var(--ink); background: white; outline: none; transition: border-color 0.15s;
+        }
+        .form-input:focus { border-color: var(--sage); }
+        .habit-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem; }
+        .habit-row .form-input { flex: 1; }
+        .rm-btn {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 1.5px solid #fca5a5; background: white;
+            color: #ef4444; font-size: 0.7rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.18s; flex-shrink: 0;
+        }
+        .rm-btn:hover { background: #fef2f2; }
+        .add-btn {
+            padding: 0.35rem 0.8rem; border-radius: 99px;
+            border: 1.5px dashed var(--sage-mid); background: transparent;
+            color: var(--sage); font-size: 0.73rem; cursor: pointer;
+            transition: all 0.18s; margin-top: 0.2rem;
+            font-family: 'DM Sans',sans-serif;
+        }
+        .add-btn:hover { background: var(--sage-light); }
+        .divider { border: none; border-top: 1px solid var(--parchment-dark); margin: 1.1rem 0; }
+        .pin-row { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+        .pin-row .form-input { width: 100px; }
+        .pin-msg { font-size: 0.7rem; margin-top: 0.3rem; }
+
+        /* ── FOOTER ── */
+        .app-footer {
+            text-align: center; margin-top: 1.25rem;
+            font-size: 0.7rem; color: var(--stone); letter-spacing: 0.04em;
+        }
+
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+        @keyframes shake { 0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)} }
+        .shake { animation: shake 0.38s ease; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+
+        @media(max-width:600px){
+            .app-wrapper { padding: 1rem 0.7rem 2rem; }
+            .app-header { padding: 1rem 1.25rem; }
+            .calendar-card { padding: 1rem; }
+            .day-cell { min-height: 58px; border-radius: 9px; }
+            .cal-grid { gap: 3px; }
+            .modal-card { padding: 1.4rem; }
+        }
+
+        /* ── FIREBASE CONFIG HELPER (shown when not configured) ── */
+        #configBanner {
+            background: #fffbeb; border: 1.5px solid #fcd34d;
+            border-radius: var(--radius-sm); padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem; font-size: 0.8rem; line-height: 1.7;
+            display: none;
+        }
+        #configBanner code {
+            background: #f3f4f6; padding: 1px 5px; border-radius: 4px;
             font-size: 0.75rem;
-            text-align: center;
-            margin-top: 2rem;
-            color: #4b5563;
-        }
-        .modal-content {
-            border-radius: 2rem;
-        }
-        .status-badge {
-            font-size: 0.8rem;
-            padding: 6px 12px;
-            border-radius: 40px;
-        }
-        .btn-toggle-group .btn {
-            border-radius: 40px;
-            margin: 0 5px;
-        }
-        .form-check-input:checked {
-            background-color: #2b7a4b;
-            border-color: #2b7a4b;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="tracker-wrapper">
-        <!-- Header with photo upload & profile -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+<!-- ═══════════════ SETUP / AUTH SCREEN ═══════════════ -->
+<div id="setupScreen">
+    <div class="setup-bg"></div>
+    <div class="setup-panel">
+        <div class="setup-icon"><i class="fas fa-leaf"></i></div>
+        <div>
+            <div class="setup-title">Personal Journey</div>
+            <div class="setup-sub">gentle progress · daily honesty</div>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tabSignIn" onclick="switchTab('signin')">Sign In</button>
+            <button class="auth-tab" id="tabSignUp" onclick="switchTab('signup')">Create Account</button>
+        </div>
+
+        <!-- Sign In -->
+        <div id="formSignIn" class="auth-form">
+            <input class="auth-input" id="siEmail" type="email" placeholder="Email address" autocomplete="email">
+            <input class="auth-input" id="siPassword" type="password" placeholder="Password" autocomplete="current-password">
+            <button class="auth-btn" onclick="doSignIn()">Sign In</button>
+            <div class="auth-err" id="siErr"></div>
+            <div class="auth-divider">or</div>
+            <button class="auth-btn" style="background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.15);" onclick="doGoogle()">
+                <i class="fab fa-google" style="margin-right:6px;"></i> Continue with Google
+            </button>
+        </div>
+
+        <!-- Sign Up -->
+        <div id="formSignUp" class="auth-form" style="display:none;">
+            <input class="auth-input" id="suEmail" type="email" placeholder="Email address" autocomplete="email">
+            <input class="auth-input" id="suPassword" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password">
+            <input class="auth-input" id="suPassword2" type="password" placeholder="Confirm password" autocomplete="new-password">
+            <button class="auth-btn" onclick="doSignUp()">Create Account</button>
+            <div class="auth-err" id="suErr"></div>
+            <div class="auth-success" id="suOk"></div>
+        </div>
+
+        <div style="font-size:0.68rem;color:rgba(255,255,255,0.18);text-align:center;line-height:1.5;">
+            All data syncs privately to your account.<br>No one else can access your journal.
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ PIN SCREEN ═══════════════ -->
+<div id="pinScreen">
+    <div class="setup-bg"></div>
+    <div class="pin-panel">
+        <div class="pin-title" id="pinScreenTitle">Enter PIN</div>
+        <div class="pin-hint" id="pinScreenHint">Access your journal</div>
+        <div class="pin-dots" id="pinDots">
+            <div class="pin-dot" id="pd0"></div>
+            <div class="pin-dot" id="pd1"></div>
+            <div class="pin-dot" id="pd2"></div>
+            <div class="pin-dot" id="pd3"></div>
+        </div>
+        <div class="pin-err" id="pinErr"></div>
+        <div class="pin-pad">
+            <button class="pin-key" data-k="1">1</button>
+            <button class="pin-key" data-k="2">2</button>
+            <button class="pin-key" data-k="3">3</button>
+            <button class="pin-key" data-k="4">4</button>
+            <button class="pin-key" data-k="5">5</button>
+            <button class="pin-key" data-k="6">6</button>
+            <button class="pin-key" data-k="7">7</button>
+            <button class="pin-key" data-k="8">8</button>
+            <button class="pin-key" data-k="9">9</button>
+            <button class="pin-key" data-k="del"><i class="fas fa-delete-left"></i></button>
+            <button class="pin-key" data-k="0">0</button>
+            <button class="pin-key enter" data-k="enter"><i class="fas fa-check"></i></button>
+        </div>
+        <div class="sign-out-link" onclick="doSignOut()">Sign out of this account</div>
+    </div>
+</div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div class="app-bg" id="appBg"></div>
+<div class="app-wrapper" id="appWrapper" style="display:none;">
+
+    <!-- Config banner (shown if Firebase not set up) -->
+    <div id="configBanner">
+        ⚠️ <strong>Firebase not configured.</strong> Open this file in a text editor and replace the placeholder values in the <code>firebaseConfig</code> object near the bottom of the file with your own Firebase project credentials.
+        Get them free at <strong>console.firebase.google.com</strong> → Project Settings → Your Apps → Web App.
+        Also enable <strong>Authentication</strong> (Email/Password + Google) and <strong>Firestore Database</strong> in your Firebase project.
+    </div>
+
+    <!-- Header -->
+    <div class="app-header">
+        <div class="header-left">
+            <div class="avatar-wrap" id="avatarWrap" title="Change photo">
+                <div class="avatar-ph" id="avatarPh"><i class="fas fa-user"></i></div>
+                <img id="avatarImg" style="display:none;" alt="">
+            </div>
             <div>
-                <h2 class="mb-0" style="font-weight: 700; color: #1f3b4c;"><i class="fas fa-leaf me-2" style="color: #2b7a4b;"></i>Jal Nasser</h2>
-                <p class="text-muted mb-0">gentle progress · daily honesty</p>
-            </div>
-            <div class="mt-2 mt-sm-0">
-                <button id="uploadPhotoBtn" class="btn btn-photo me-2"><i class="fas fa-camera me-1"></i> Set my photo</button>
-                <button id="resetAllDataBtn" class="btn btn-outline-secondary btn-sm" style="border-radius: 40px;"><i class="fas fa-trash-alt"></i> Reset data</button>
+                <div class="header-name" id="headerName">My Journey</div>
+                <div class="header-tagline" id="headerTagline">gentle progress · daily honesty</div>
             </div>
         </div>
-        
-        <!-- privacy note -->
-        <div class="alert alert-light border-0 bg-transparent small text-secondary fst-italic ps-0">
-            <i class="fas fa-lock me-1"></i> All data stays only on this device — safe & confidential.
-        </div>
-
-        <!-- calendar & legend -->
-        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-            <div class="d-flex gap-2">
-                <button id="prevMonthBtn" class="btn btn-outline-secondary rounded-pill"><i class="fas fa-chevron-left"></i> Prev</button>
-                <button id="nextMonthBtn" class="btn btn-outline-secondary rounded-pill">Next <i class="fas fa-chevron-right"></i></button>
-            </div>
-            <h4 id="monthYearDisplay" class="fw-bold my-2 my-sm-0" style="color:#2c3e66;"></h4>
-            <div class="legend d-flex gap-3 flex-wrap">
-                <span><span style="background:#2b7a4b;"></span> Good</span>
-                <span><span style="background:#e67e22;"></span> Slipped</span>
-                <span><span style="background:#c0392b;"></span> Skipped</span>
-                <span><span style="background:#adb5bd;"></span> No record</span>
-            </div>
-        </div>
-
-        <!-- calendar grid -->
-        <div id="calendarGrid" class="calendar-grid"></div>
-
-        <!-- daily reminder / three-checkboxes insight -->
-        <div class="mt-4 pt-2 border-top text-center small text-secondary">
-            <i class="fas fa-heart me-1" style="color:#c44569;"></i> Every effort counts — use the daily log to check triggers, replacement & repentance.
+        <div class="header-right">
+            <div class="sync-badge"><div class="sync-dot" id="syncDot"></div><span id="syncLabel">Synced</span></div>
+            <button class="btn-pill btn-outline" id="settingsBtn"><i class="fas fa-sliders"></i> Settings</button>
+            <button class="btn-pill btn-outline" id="photoBtn"><i class="fas fa-image"></i> Photo</button>
+            <button class="btn-pill btn-clay-outline" id="lockBtn"><i class="fas fa-lock"></i> Lock</button>
         </div>
     </div>
-    <footer>
-        <i class="fas fa-shield-alt"></i> Your journey, your pace. No judgement, only mercy.
-    </footer>
+
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="calendar-card">
+        <div class="cal-nav">
+            <div class="nav-btns">
+                <button class="nav-btn" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+                <button class="nav-btn" id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="month-title" id="monthTitle"></div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--sage)"></div>Good</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Slipped</div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--clay)"></div>Skipped</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#c8cdd3"></div>None</div>
+            </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+    </div>
+
+    <div class="app-footer">
+        <i class="fas fa-shield-alt" style="color:var(--sage)"></i>&nbsp; Your journey, your pace. No judgement — only mercy.
+    </div>
 </div>
 
-<!-- Modal for Day Details (with 3 checkboxes + status selection) -->
-<div class="modal fade" id="dayModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header" style="border-bottom: 2px solid #e2e8f0;">
-                <h5 class="modal-title fw-bold" id="modalDateTitle"><i class="far fa-calendar-alt me-2"></i>Day Log</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3 text-center">
-                    <span id="modalDateDetail" class="badge bg-secondary bg-opacity-25 text-dark px-3 py-2 rounded-pill"></span>
-                </div>
-                <!-- Status Selector: Good / Slipped / Skipped -->
-                <label class="fw-semibold mb-2"><i class="fas fa-flag-checkered me-1"></i> How was this day?</label>
-                <div class="btn-group w-100 mb-4 d-flex justify-content-between gap-2" role="group" id="statusToggleGroup">
-                    <button type="button" data-status="good" class="btn btn-outline-success rounded-pill flex-fill"><i class="fas fa-smile-wink"></i> Good</button>
-                    <button type="button" data-status="slipped" class="btn btn-outline-warning rounded-pill flex-fill"><i class="fas fa-praying-hands"></i> Slipped</button>
-                    <button type="button" data-status="skipped" class="btn btn-outline-danger rounded-pill flex-fill"><i class="fas fa-skull-crosswalk"></i> Skipped</button>
-                </div>
-                
-                <hr class="my-3">
-                <label class="fw-semibold mb-2"><i class="fas fa-clipboard-list me-1"></i> Reflect & heal (optional but powerful)</label>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" id="cbTrigger">
-                    <label class="form-check-label" for="cbTrigger">
-                        ✅ Avoided my biggest trigger (phone in bed / late loneliness)
-                    </label>
-                </div>
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" id="cbReplace">
-                    <label class="form-check-label" for="cbReplace">
-                        🧊 Replaced urge with action (prayer, cold water, walk, dhikr)
-                    </label>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="cbRepent">
-                    <label class="form-check-label" for="cbRepent">
-                        🤲 Repented & didn't binge (Astaghfirullah, prayed 2 raka'ah)
-                    </label>
-                </div>
-                <div class="alert alert-light border small" style="background:#faf9ff;">
-                    <i class="fas fa-lightbulb text-warning"></i> <strong>Tip:</strong> Even if you slipped, checking "repented & stopped spiral" is victory.
-                </div>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button type="button" id="clearDayBtn" class="btn btn-outline-secondary rounded-pill"><i class="fas fa-eraser"></i> Clear all</button>
-                <button type="button" id="saveDayBtn" class="btn btn-success rounded-pill px-4"><i class="fas fa-save"></i> Save progress</button>
-            </div>
+<!-- ═══════════════ DAY MODAL ═══════════════ -->
+<div class="modal-overlay" id="dayModal">
+    <div class="modal-card">
+        <button class="close-x" id="closeDayBtn"><i class="fas fa-times"></i></button>
+        <div class="modal-badge" id="mBadge"></div>
+        <div class="modal-title" id="mTitle"></div>
+        <div class="sec-label">How was this day?</div>
+        <div class="status-group">
+            <button class="status-btn" data-s="good"><i class="fas fa-check-circle"></i>Good</button>
+            <button class="status-btn" data-s="slipped"><i class="fas fa-praying-hands"></i>Slipped</button>
+            <button class="status-btn" data-s="skipped"><i class="fas fa-times-circle"></i>Skipped</button>
+        </div>
+        <div class="sec-label">Reflect & heal</div>
+        <div id="habitChecks"></div>
+        <div class="tip-box" id="tipBox"></div>
+        <div class="modal-foot">
+            <button class="btn-pill btn-clay-outline" id="clearDayBtn"><i class="fas fa-eraser"></i> Clear</button>
+            <button class="btn-pill btn-sage" id="saveDayBtn"><i class="fas fa-check"></i> Save</button>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // ------------- CONFIDENTIAL LOCAL STORAGE -------------
-    const STORAGE_KEY = "JalNasser_Tracker_Data";
-    // Data structure: { "YYYY-MM-DD": { status: "good"|"slipped"|"skipped"|null, checkboxes: { trigger, replace, repent } } }
-    let trackerData = {};
-    
-    // current calendar view
-    let currentYear = new Date().getFullYear();
-    let currentMonth = new Date().getMonth(); // 0-11
-    let selectedDateStr = ""; // for modal
-    
-    // DOM elements
-    const calendarGrid = document.getElementById("calendarGrid");
-    const monthYearDisplay = document.getElementById("monthYearDisplay");
-    const prevMonthBtn = document.getElementById("prevMonthBtn");
-    const nextMonthBtn = document.getElementById("nextMonthBtn");
-    const resetAllDataBtn = document.getElementById("resetAllDataBtn");
-    const uploadPhotoBtn = document.getElementById("uploadPhotoBtn");
-    
-    // modal elements
-    const dayModalEl = document.getElementById("dayModal");
-    let dayModal = null;
-    const modalDateTitle = document.getElementById("modalDateTitle");
-    const modalDateDetail = document.getElementById("modalDateDetail");
-    const cbTrigger = document.getElementById("cbTrigger");
-    const cbReplace = document.getElementById("cbReplace");
-    const cbRepent = document.getElementById("cbRepent");
-    const clearDayBtn = document.getElementById("clearDayBtn");
-    const saveDayBtn = document.getElementById("saveDayBtn");
-    let activeStatusButton = null; // track which status button is active
-    
-    // ----- helper functions -----
-    function loadData() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if(stored) {
-            try {
-                trackerData = JSON.parse(stored);
-            } catch(e) { trackerData = {}; }
+<!-- ═══════════════ SETTINGS MODAL ═══════════════ -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-card" style="max-width:500px;position:relative;">
+        <button class="close-x" id="closeSettingsBtn"><i class="fas fa-times"></i></button>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:500;margin-bottom:0.25rem;">Settings</div>
+        <div style="font-size:0.75rem;color:var(--stone);margin-bottom:1.5rem;">Synced to your account</div>
+
+        <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input class="form-input" id="sName" placeholder="e.g. Jal Nasser">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Tagline</label>
+            <input class="form-input" id="sTagline" placeholder="e.g. gentle progress · daily honesty">
+        </div>
+
+        <hr class="divider">
+        <div class="sec-label">Daily Habits</div>
+        <div id="sHabits"></div>
+        <button class="add-btn" id="addHabitBtn"><i class="fas fa-plus"></i> Add habit</button>
+
+        <hr class="divider">
+        <div class="form-group">
+            <label class="form-label">Motivational Tip</label>
+            <textarea class="form-input" id="sTip" rows="2"></textarea>
+        </div>
+
+        <hr class="divider">
+        <div class="sec-label">Change PIN</div>
+        <div class="pin-row">
+            <input class="form-input" id="newPin1" type="password" maxlength="4" placeholder="New PIN" inputmode="numeric">
+            <input class="form-input" id="newPin2" type="password" maxlength="4" placeholder="Confirm" inputmode="numeric">
+            <button class="btn-pill btn-sage" id="savePinBtn">Set PIN</button>
+        </div>
+        <div class="pin-msg" id="pinMsg"></div>
+
+        <hr class="divider">
+        <div class="sec-label" style="color:var(--clay);">Danger Zone</div>
+        <button class="btn-pill btn-clay-outline" id="resetAllBtn"><i class="fas fa-trash-alt"></i> Reset all data</button>
+
+        <div style="text-align:right;margin-top:1.25rem;padding-top:0.9rem;border-top:1px solid var(--parchment-dark);">
+            <button class="btn-pill btn-sage" id="saveSettingsBtn"><i class="fas fa-check"></i> Save</button>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="photoInput" accept="image/*" style="display:none;">
+<input type="file" id="avatarInput" accept="image/*" style="display:none;">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FIREBASE SDK
+═══════════════════════════════════════════════════════════════ -->
+<script type="module">
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  STEP 1 — PASTE YOUR FIREBASE CONFIG HERE               ║
+// ║  Get it from: console.firebase.google.com               ║
+// ║  Project Settings → Your Apps → Web App → SDK snippet  ║
+// ╚══════════════════════════════════════════════════════════╝
+const firebaseConfig = {
+    apiKey:            "YOUR_API_KEY",
+    authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId:         "YOUR_PROJECT_ID",
+    storageBucket:     "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId:             "YOUR_APP_ID"
+};
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  STEP 2 — In Firebase Console, enable:                  ║
+// ║   • Authentication → Email/Password (and Google)        ║
+// ║   • Firestore Database (start in test mode)             ║
+// ╚══════════════════════════════════════════════════════════╝
+
+// ── Imports ────────────────────────────────────────────────
+import { initializeApp }                              from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword,
+         signInWithEmailAndPassword, GoogleAuthProvider,
+         signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc,
+         onSnapshot, serverTimestamp }                 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── Init ──────────────────────────────────────────────────
+const CONFIGURED = !firebaseConfig.apiKey.startsWith("YOUR_");
+let app, auth, db;
+
+if (CONFIGURED) {
+    app  = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db   = getFirestore(app);
+} else {
+    document.getElementById('configBanner').style.display = 'block';
+    // hide auth screens, show demo mode
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('appWrapper').style.display = 'block';
+    initAppUI();
+    loadLocalFallback();
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const DEFAULT_SETTINGS = {
+    name:    'Jal Nasser',
+    tagline: 'gentle progress · daily honesty',
+    tip:     '✨ Even if you slipped, repenting and stopping the spiral is itself a victory.',
+    habits: [
+        { emoji:'✅', text:'Avoided my biggest trigger (phone in bed / late loneliness)' },
+        { emoji:'🧊', text:'Replaced urge with action (prayer, cold water, walk, dhikr)' },
+        { emoji:'🤲', text:"Repented & didn't spiral (Astaghfirullah, prayed 2 raka'ah)" },
+    ],
+    pin: null   // stored as btoa(pin)
+};
+
+let trackerData = {};  // { "YYYY-MM-DD": { status, checks:{0:bool,...} } }
+let settings    = { ...DEFAULT_SETTINGS };
+let currentUID  = null;
+let currentYear = new Date().getFullYear();
+let currentMonth= new Date().getMonth();
+let selectedDate= '';
+let firestoreUnsub = null;
+let pinEntry    = '';
+let pinMode     = 'unlock';   // 'unlock' | 'set-1' | 'set-2'
+let pinFirst    = '';
+
+// ═══════════════════════════════════════════════════════════
+// AUTH STATE
+// ═══════════════════════════════════════════════════════════
+if (CONFIGURED) {
+    onAuthStateChanged(auth, user => {
+        if (user) {
+            currentUID = user.uid;
+            subscribeToFirestore();
+        } else {
+            currentUID = null;
+            if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
+            showSetupScreen();
+        }
+    });
+}
+
+function showSetupScreen() {
+    document.getElementById('setupScreen').style.opacity = '1';
+    document.getElementById('setupScreen').style.display = 'flex';
+    document.getElementById('pinScreen').classList.remove('visible');
+    document.getElementById('appWrapper').style.display = 'none';
+}
+
+// ── Firestore real-time sync ──────────────────────────────
+function subscribeToFirestore() {
+    if (firestoreUnsub) firestoreUnsub();
+    const ref = doc(db, 'users', currentUID);
+    firestoreUnsub = onSnapshot(ref, snap => {
+        if (snap.exists()) {
+            const d = snap.data();
+            trackerData = d.trackerData || {};
+            settings    = { ...DEFAULT_SETTINGS, ...(d.settings || {}) };
         } else {
             trackerData = {};
+            settings    = { ...DEFAULT_SETTINGS };
+            persistToFirestore();
         }
-        // ensure every entry has checkboxes object if missing
-        for(let date in trackerData) {
-            if(trackerData[date] && !trackerData[date].checkboxes) {
-                trackerData[date].checkboxes = { trigger: false, replace: false, repent: false };
-            }
-        }
-    }
-    
-    function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(trackerData));
-    }
-    
-    function getStatusForDate(dateStr) {
-        if(trackerData[dateStr] && trackerData[dateStr].status) {
-            return trackerData[dateStr].status;
-        }
-        return null;
-    }
-    
-    function setDayData(dateStr, status, checkboxesObj) {
-        if(!trackerData[dateStr]) trackerData[dateStr] = { checkboxes: { trigger: false, replace: false, repent: false } };
-        trackerData[dateStr].status = status;
-        if(checkboxesObj) {
-            trackerData[dateStr].checkboxes = { ...checkboxesObj };
-        }
-        saveData();
-        renderCalendar();
-    }
-    
-    function clearDayData(dateStr) {
-        if(trackerData[dateStr]) {
-            delete trackerData[dateStr];
-        }
-        saveData();
-        renderCalendar();
-    }
-    
-    // reset all data
-    function resetAllData() {
-        if(confirm("⚠️ This will permanently erase all your logs. Are you sure? Your privacy is respected, but action is irreversible.")) {
-            trackerData = {};
-            saveData();
+        applySettings();
+        // After loading, check PIN requirement
+        if (!document.getElementById('appWrapper').style.display ||
+             document.getElementById('appWrapper').style.display === 'none') {
+            checkPinOnLoad();
+        } else {
+            renderStats();
             renderCalendar();
         }
-    }
-    
-    // render calendar grid
-    function renderCalendar() {
-        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-        const startWeekday = firstDayOfMonth.getDay(); // 0 Sunday
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        
-        monthYearDisplay.innerText = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
-        
-        let gridHtml = "";
-        // weekday headers (Sun to Sat)
-        const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-        weekdays.forEach(day => {
-            gridHtml += `<div class="weekday">${day}</div>`;
+        setSynced();
+    }, err => {
+        console.error(err);
+        setSyncError();
+    });
+}
+
+async function persistToFirestore() {
+    if (!currentUID || !CONFIGURED) return;
+    setSyncing();
+    try {
+        await setDoc(doc(db, 'users', currentUID), {
+            trackerData,
+            settings,
+            updatedAt: serverTimestamp()
         });
-        
-        // empty cells for days before month start
-        for(let i = 0; i < startWeekday; i++) {
-            gridHtml += `<div class="day-cell opacity-50" style="background:#eef2f5;"><div class="day-number" style="color:#aaa;">-</div></div>`;
+        setSynced();
+    } catch(e) {
+        console.error(e);
+        setSyncError();
+    }
+}
+
+// ── Sync indicator ─────────────────────────────────────────
+function setSyncing() {
+    document.getElementById('syncDot').className = 'sync-dot syncing';
+    document.getElementById('syncLabel').textContent = 'Syncing…';
+}
+function setSynced() {
+    document.getElementById('syncDot').className = 'sync-dot';
+    document.getElementById('syncLabel').textContent = 'Synced';
+}
+function setSyncError() {
+    document.getElementById('syncDot').className = 'sync-dot error';
+    document.getElementById('syncLabel').textContent = 'Sync error';
+}
+
+// ── Auth actions ──────────────────────────────────────────
+window.switchTab = (tab) => {
+    document.getElementById('tabSignIn').classList.toggle('active', tab === 'signin');
+    document.getElementById('tabSignUp').classList.toggle('active', tab === 'signup');
+    document.getElementById('formSignIn').style.display = tab === 'signin' ? 'flex' : 'none';
+    document.getElementById('formSignUp').style.display = tab === 'signup' ? 'flex' : 'none';
+};
+
+window.doSignIn = async () => {
+    const email = document.getElementById('siEmail').value.trim();
+    const pass  = document.getElementById('siPassword').value;
+    const err   = document.getElementById('siErr');
+    err.textContent = '';
+    try {
+        await signInWithEmailAndPassword(auth, email, pass);
+    } catch(e) {
+        err.textContent = friendlyErr(e.code);
+    }
+};
+
+window.doSignUp = async () => {
+    const email = document.getElementById('suEmail').value.trim();
+    const pass  = document.getElementById('suPassword').value;
+    const pass2 = document.getElementById('suPassword2').value;
+    const err   = document.getElementById('suErr');
+    const ok    = document.getElementById('suOk');
+    err.textContent = ''; ok.textContent = '';
+    if (pass !== pass2) { err.textContent = 'Passwords don\'t match.'; return; }
+    try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        ok.textContent = '✓ Account created! Signing you in…';
+    } catch(e) {
+        err.textContent = friendlyErr(e.code);
+    }
+};
+
+window.doGoogle = async () => {
+    const err = document.getElementById('siErr');
+    try {
+        await signInWithPopup(auth, new GoogleAuthProvider());
+    } catch(e) {
+        err.textContent = friendlyErr(e.code);
+    }
+};
+
+window.doSignOut = async () => {
+    if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
+    await signOut(auth);
+    document.getElementById('pinScreen').classList.remove('visible');
+};
+
+function friendlyErr(code) {
+    const map = {
+        'auth/user-not-found':      'No account with that email.',
+        'auth/wrong-password':      'Wrong password.',
+        'auth/email-already-in-use':'Email already in use.',
+        'auth/weak-password':       'Password must be at least 6 characters.',
+        'auth/invalid-email':       'Invalid email address.',
+        'auth/too-many-requests':   'Too many attempts. Try again later.',
+        'auth/popup-closed-by-user':'Sign-in cancelled.',
+    };
+    return map[code] || 'Something went wrong. Please try again.';
+}
+
+// ═══════════════════════════════════════════════════════════
+// PIN LOGIC (stored in Firestore settings.pin = btoa(pin))
+// ═══════════════════════════════════════════════════════════
+function checkPinOnLoad() {
+    if (!settings.pin) {
+        // No PIN set yet — go straight to app, let user set one in settings
+        revealApp();
+    } else {
+        showPinScreen('unlock');
+    }
+}
+
+function showPinScreen(mode) {
+    pinMode = mode; pinEntry = ''; pinFirst = '';
+    updatePinDots();
+    document.getElementById('pinErr').textContent = '';
+    const t = document.getElementById('pinScreenTitle');
+    const h = document.getElementById('pinScreenHint');
+    if (mode === 'unlock') { t.textContent = settings.name || 'Your Journey'; h.textContent = 'Enter your PIN'; }
+    else if (mode === 'set-1') { t.textContent = 'Set a PIN'; h.textContent = 'Choose a 4-digit PIN'; }
+    else if (mode === 'set-2') { t.textContent = 'Confirm PIN'; h.textContent = 'Enter it again to confirm'; }
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('pinScreen').classList.add('visible');
+}
+
+function handlePinKey(k) {
+    const errEl = document.getElementById('pinErr');
+    errEl.textContent = '';
+    if (k === 'del') { pinEntry = pinEntry.slice(0,-1); }
+    else if (k === 'enter') { submitPin(); return; }
+    else if (pinEntry.length < 4) {
+        pinEntry += k;
+        if (pinEntry.length === 4) setTimeout(submitPin, 110);
+    }
+    updatePinDots();
+}
+
+function updatePinDots() {
+    for (let i=0;i<4;i++) document.getElementById('pd'+i).classList.toggle('filled', i < pinEntry.length);
+}
+
+function submitPin() {
+    const errEl = document.getElementById('pinErr');
+    if (pinEntry.length < 4) { errEl.textContent = 'Enter 4 digits'; pinEntry=''; updatePinDots(); return; }
+
+    if (pinMode === 'unlock') {
+        if (btoa(pinEntry) !== settings.pin) {
+            shakePin(); errEl.textContent = 'Incorrect PIN. Try again.';
+            pinEntry=''; updatePinDots(); return;
         }
-        
-        const today = new Date();
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-        
-        for(let d = 1; d <= daysInMonth; d++) {
-            const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            const status = getStatusForDate(dateStr);
-            let statusClass = "status-none";
-            let iconHtml = "";
-            if(status === "good") {
-                statusClass = "status-good";
-                iconHtml = '<i class="fas fa-check-circle" style="color:#2b7a4b; font-size:1.5rem;"></i>';
-            } else if(status === "slipped") {
-                statusClass = "status-slipped";
-                iconHtml = '<i class="fas fa-hand-peace" style="color:#e67e22; font-size:1.5rem;"></i>';
-            } else if(status === "skipped") {
-                statusClass = "status-skipped";
-                iconHtml = '<i class="fas fa-calendar-times" style="color:#c0392b; font-size:1.5rem;"></i>';
-            } else {
-                iconHtml = '<i class="far fa-circle" style="color:#adb5bd; font-size:1.3rem;"></i>';
-            }
-            
-            let additionalClass = "";
-            if(dateStr === todayStr) additionalClass = "today-highlight";
-            
-            gridHtml += `
-                <div class="day-cell ${statusClass} ${additionalClass}" data-date="${dateStr}">
-                    <div class="day-number">${d}</div>
-                    <div class="status-icon">${iconHtml}</div>
-                </div>
-            `;
+        document.getElementById('pinScreen').classList.remove('visible');
+        revealApp();
+    } else if (pinMode === 'set-1') {
+        pinFirst = pinEntry; pinEntry = '';
+        updatePinDots();
+        showPinScreen('set-2');
+    } else if (pinMode === 'set-2') {
+        if (pinEntry !== pinFirst) {
+            shakePin(); errEl.textContent = 'PINs don\'t match. Start over.';
+            pinEntry=''; pinFirst=''; updatePinDots();
+            setTimeout(() => showPinScreen('set-1'), 900);
+            return;
         }
-        
-        calendarGrid.innerHTML = gridHtml;
-        
-        // attach click listeners to each day cell
-        document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
-            cell.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const dateVal = cell.getAttribute('data-date');
-                openModalForDate(dateVal);
-            });
+        settings.pin = btoa(pinEntry);
+        persistToFirestore();
+        document.getElementById('pinScreen').classList.remove('visible');
+        revealApp();
+    }
+}
+
+function shakePin() {
+    const el = document.getElementById('pinDots');
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+}
+
+function revealApp() {
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('appWrapper').style.display  = 'block';
+    initAppUI();
+    applySettings();
+    renderStats();
+    renderCalendar();
+}
+
+// ═══════════════════════════════════════════════════════════
+// APP SETTINGS
+// ═══════════════════════════════════════════════════════════
+function applySettings() {
+    document.getElementById('headerName').textContent    = settings.name    || 'My Journey';
+    document.getElementById('headerTagline').textContent = settings.tagline || '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════════════════
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function todayStr() {
+    const t = new Date();
+    return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+}
+
+function renderStats() {
+    const counts = { good:0, slipped:0, skipped:0, streak:0 };
+    const tStr = todayStr();
+    let d = new Date(tStr);
+    while (true) {
+        const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        if (trackerData[ds]?.status === 'good') { counts.streak++; d.setDate(d.getDate()-1); }
+        else break;
+    }
+    Object.values(trackerData).forEach(e => { if(e.status) counts[e.status]=(counts[e.status]||0)+1; });
+    document.getElementById('statsRow').innerHTML = `
+        <div class="stat-card stat-good"><div class="stat-val">${counts.good}</div><div class="stat-label">Good Days</div></div>
+        <div class="stat-card stat-slipped"><div class="stat-val">${counts.slipped}</div><div class="stat-label">Slipped</div></div>
+        <div class="stat-card stat-skipped"><div class="stat-val">${counts.skipped}</div><div class="stat-label">Skipped</div></div>
+        <div class="stat-card"><div class="stat-val">${counts.streak}</div><div class="stat-label">🔥 Streak</div></div>
+        <div class="stat-card"><div class="stat-val">${Object.keys(trackerData).length}</div><div class="stat-label">Days Logged</div></div>
+    `;
+}
+
+function renderCalendar() {
+    document.getElementById('monthTitle').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInM  = new Date(currentYear, currentMonth+1, 0).getDate();
+    const tStr     = todayStr();
+    const colors   = ['var(--sage)','var(--amber)','var(--clay)','#7c6adb','#3b9dd4'];
+    let html = '';
+    ['SUN','MON','TUE','WED','THU','FRI','SAT'].forEach(d => { html += `<div class="wday">${d}</div>`; });
+    for (let i=0;i<firstDay;i++) html += `<div class="day-cell empty"></div>`;
+    for (let d=1;d<=daysInM;d++) {
+        const ds = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const e  = trackerData[ds];
+        const s  = e?.status;
+        const isFuture = ds > tStr;
+        const isToday  = ds === tStr;
+        let cls = ''; let icon = '<span style="color:#c8cdd3;font-size:.9rem;">◦</span>';
+        if (s==='good')    { cls='s-good';    icon='<span style="color:var(--sage)">✓</span>'; }
+        if (s==='slipped') { cls='s-slipped'; icon='<span style="color:var(--amber)">~</span>'; }
+        if (s==='skipped') { cls='s-skipped'; icon='<span style="color:var(--clay)">✗</span>'; }
+        if (isToday) cls += ' today';
+        if (isFuture) cls += ' future';
+        let dots = '';
+        if (e?.checks) Object.values(e.checks).forEach((v,i) => { if(v) dots+=`<div class="cdot" style="background:${colors[i%colors.length]}"></div>`; });
+        html += `<div class="day-cell ${cls}" data-date="${ds}">
+            <div class="day-num">${d}</div>
+            <div class="day-icon">${icon}</div>
+            ${dots?`<div class="day-checks">${dots}</div>`:''}
+        </div>`;
+    }
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = html;
+    grid.querySelectorAll('.day-cell[data-date]:not(.future)').forEach(cell => {
+        cell.addEventListener('click', () => openDayModal(cell.dataset.date));
+    });
+}
+
+// ═══════════════════════════════════════════════════════════
+// DAY MODAL
+// ═══════════════════════════════════════════════════════════
+function openDayModal(ds) {
+    selectedDate = ds;
+    const parts = ds.split('-');
+    const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
+    document.getElementById('mBadge').textContent = ds;
+    document.getElementById('mTitle').textContent = dt.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    document.getElementById('tipBox').textContent  = settings.tip || DEFAULT_SETTINGS.tip;
+    const e = trackerData[ds];
+    document.querySelectorAll('.status-btn').forEach(btn => {
+        btn.className = 'status-btn';
+        if (e?.status === btn.dataset.s) btn.classList.add('a-'+e.status);
+    });
+    const hc = document.getElementById('habitChecks');
+    hc.innerHTML = '';
+    (settings.habits || DEFAULT_SETTINGS.habits).forEach((h,i) => {
+        const checked = e?.checks?.[i] || false;
+        const lbl = document.createElement('label');
+        lbl.className = 'habit-check' + (checked?' checked':'');
+        lbl.dataset.idx = i;
+        lbl.innerHTML = `<div class="check-box"><i class="fas fa-check" style="font-size:.55rem;"></i></div>
+            <div class="habit-text"><span>${h.emoji}</span> ${h.text}</div>`;
+        lbl.addEventListener('click', () => lbl.classList.toggle('checked'));
+        hc.appendChild(lbl);
+    });
+    document.getElementById('dayModal').classList.add('show');
+}
+
+function closeDayModal() { document.getElementById('dayModal').classList.remove('show'); }
+
+function saveDayModal() {
+    let status = null;
+    document.querySelectorAll('.status-btn').forEach(btn => {
+        ['good','slipped','skipped'].forEach(s => { if(btn.classList.contains('a-'+s)) status=s; });
+    });
+    const checks = {};
+    document.querySelectorAll('#habitChecks .habit-check').forEach(lbl => {
+        checks[lbl.dataset.idx] = lbl.classList.contains('checked');
+    });
+    if (!trackerData[selectedDate]) trackerData[selectedDate] = {};
+    trackerData[selectedDate].status = status;
+    trackerData[selectedDate].checks = checks;
+    persistToFirestore();
+    closeDayModal();
+    renderStats(); renderCalendar();
+}
+
+function clearDayModal() {
+    if (!confirm(`Clear all records for ${selectedDate}?`)) return;
+    delete trackerData[selectedDate];
+    persistToFirestore();
+    closeDayModal();
+    renderStats(); renderCalendar();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS MODAL
+// ═══════════════════════════════════════════════════════════
+function openSettingsModal() {
+    document.getElementById('sName').value    = settings.name    || '';
+    document.getElementById('sTagline').value = settings.tagline || '';
+    document.getElementById('sTip').value     = settings.tip     || '';
+    document.getElementById('newPin1').value  = '';
+    document.getElementById('newPin2').value  = '';
+    document.getElementById('pinMsg').textContent = '';
+    renderSettingsHabits();
+    document.getElementById('settingsModal').classList.add('show');
+}
+
+function renderSettingsHabits() {
+    const list = document.getElementById('sHabits');
+    list.innerHTML = '';
+    (settings.habits||[]).forEach((h,i) => {
+        const row = document.createElement('div');
+        row.className = 'habit-row';
+        row.innerHTML = `
+            <input class="form-input" style="width:46px;text-align:center;padding:0.45rem 0.3rem;" data-ei="${i}" value="${h.emoji}" maxlength="2">
+            <input class="form-input" data-ti="${i}" value="${h.text}" placeholder="Habit">
+            <button class="rm-btn" data-ri="${i}"><i class="fas fa-times"></i></button>`;
+        list.appendChild(row);
+    });
+    list.querySelectorAll('[data-ri]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            settings.habits.splice(+btn.dataset.ri, 1);
+            renderSettingsHabits();
         });
-    }
-    
-    // open modal for specific date
-    function openModalForDate(dateStr) {
-        selectedDateStr = dateStr;
-        const formattedDate = new Date(dateStr).toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-        modalDateTitle.innerHTML = `<i class="far fa-calendar-alt me-2"></i>${formattedDate}`;
-        modalDateDetail.innerText = dateStr;
-        
-        // load existing data
-        const existing = trackerData[dateStr];
-        let currentStatus = existing ? existing.status : null;
-        let checkboxes = existing?.checkboxes || { trigger: false, replace: false, repent: false };
-        
-        // reset checkboxes UI
-        cbTrigger.checked = checkboxes.trigger || false;
-        cbReplace.checked = checkboxes.replace || false;
-        cbRepent.checked = checkboxes.repent || false;
-        
-        // reset status buttons active style
-        const btns = document.querySelectorAll('#statusToggleGroup button');
-        btns.forEach(btn => {
-            btn.classList.remove('active', 'btn-success', 'btn-warning', 'btn-danger');
-            btn.classList.add('btn-outline-success', 'btn-outline-warning', 'btn-outline-danger');
-            if((btn.getAttribute('data-status') === 'good' && currentStatus === 'good') ||
-               (btn.getAttribute('data-status') === 'slipped' && currentStatus === 'slipped') ||
-               (btn.getAttribute('data-status') === 'skipped' && currentStatus === 'skipped')) {
-                btn.classList.remove('btn-outline-success', 'btn-outline-warning', 'btn-outline-danger');
-                if(currentStatus === 'good') btn.classList.add('btn-success');
-                if(currentStatus === 'slipped') btn.classList.add('btn-warning');
-                if(currentStatus === 'skipped') btn.classList.add('btn-danger');
-                btn.classList.add('active');
-            }
-        });
-        
-        // if no status, unselect all
-        if(!currentStatus) {
-            // do nothing, all outlined
+    });
+}
+
+function saveSettingsModal() {
+    settings.name    = document.getElementById('sName').value.trim()    || DEFAULT_SETTINGS.name;
+    settings.tagline = document.getElementById('sTagline').value.trim() || DEFAULT_SETTINGS.tagline;
+    settings.tip     = document.getElementById('sTip').value.trim()     || DEFAULT_SETTINGS.tip;
+    const emojis = document.querySelectorAll('#sHabits [data-ei]');
+    const texts  = document.querySelectorAll('#sHabits [data-ti]');
+    settings.habits = [];
+    emojis.forEach((el,i) => { settings.habits.push({ emoji: el.value||'✅', text: texts[i]?.value||'' }); });
+    persistToFirestore();
+    applySettings();
+    document.getElementById('settingsModal').classList.remove('show');
+    renderCalendar();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PHOTO / AVATAR (stored in Firestore settings as base64)
+// ═══════════════════════════════════════════════════════════
+function applyAvatar(url) {
+    if (!url) return;
+    document.getElementById('avatarImg').src = url;
+    document.getElementById('avatarImg').style.display = 'block';
+    document.getElementById('avatarPh').style.display  = 'none';
+}
+function applyBg(url) {
+    if (!url) return;
+    document.getElementById('appBg').style.backgroundImage = `url('${url}')`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LOCAL FALLBACK (no Firebase config)
+// ═══════════════════════════════════════════════════════════
+function loadLocalFallback() {
+    try { trackerData = JSON.parse(localStorage.getItem('jt_data')) || {}; } catch{}
+    try { settings = { ...DEFAULT_SETTINGS, ...(JSON.parse(localStorage.getItem('jt_settings'))||{}) }; } catch{}
+    const bg = localStorage.getItem('jt_bg');
+    if (bg) applyBg(bg); else applyBg("https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=1950&auto=format");
+    applySettings(); renderStats(); renderCalendar();
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI INIT (event listeners — called once app is visible)
+// ═══════════════════════════════════════════════════════════
+let uiInited = false;
+function initAppUI() {
+    if (uiInited) return; uiInited = true;
+
+    // PIN pad
+    document.querySelectorAll('.pin-key').forEach(btn => {
+        btn.addEventListener('click', () => handlePinKey(btn.dataset.k));
+    });
+    document.addEventListener('keydown', e => {
+        if (document.getElementById('pinScreen').classList.contains('visible')) {
+            if (e.key>='0'&&e.key<='9') handlePinKey(e.key);
+            else if (e.key==='Backspace') handlePinKey('del');
+            else if (e.key==='Enter') handlePinKey('enter');
         }
-        
-        dayModal.show();
-    }
-    
-    // get selected status from modal toggle group
-    function getSelectedStatus() {
-        const btns = document.querySelectorAll('#statusToggleGroup button');
-        for(let btn of btns) {
-            if(btn.classList.contains('active')) {
-                return btn.getAttribute('data-status');
-            }
-        }
-        return null;
-    }
-    
-    function setActiveStatusButton(statusVal) {
-        const btns = document.querySelectorAll('#statusToggleGroup button');
-        btns.forEach(btn => {
-            btn.classList.remove('active', 'btn-success', 'btn-warning', 'btn-danger');
-            btn.classList.add('btn-outline-success', 'btn-outline-warning', 'btn-outline-danger');
-            if(btn.getAttribute('data-status') === statusVal) {
-                btn.classList.remove(`btn-outline-${statusVal === 'good' ? 'success' : (statusVal === 'slipped' ? 'warning' : 'danger')}`);
-                if(statusVal === 'good') btn.classList.add('btn-success');
-                if(statusVal === 'slipped') btn.classList.add('btn-warning');
-                if(statusVal === 'skipped') btn.classList.add('btn-danger');
-                btn.classList.add('active');
-            }
+    });
+
+    // Status btns toggle
+    document.querySelectorAll('.status-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const s = btn.dataset.s;
+            const wasActive = btn.classList.contains('a-'+s);
+            document.querySelectorAll('.status-btn').forEach(b => b.className='status-btn');
+            if (!wasActive) btn.classList.add('a-'+s);
         });
-    }
-    
-    // save modal content
-    function saveCurrentDay() {
-        let selectedStatus = getSelectedStatus();
-        const checkboxesState = {
-            trigger: cbTrigger.checked,
-            replace: cbReplace.checked,
-            repent: cbRepent.checked
+    });
+
+    // Day modal
+    document.getElementById('closeDayBtn').addEventListener('click', closeDayModal);
+    document.getElementById('saveDayBtn').addEventListener('click', saveDayModal);
+    document.getElementById('clearDayBtn').addEventListener('click', clearDayModal);
+    document.getElementById('dayModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeDayModal(); });
+
+    // Settings modal
+    document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+    document.getElementById('closeSettingsBtn').addEventListener('click', () => document.getElementById('settingsModal').classList.remove('show'));
+    document.getElementById('saveSettingsBtn').addEventListener('click', saveSettingsModal);
+    document.getElementById('settingsModal').addEventListener('click', e => { if(e.target===e.currentTarget) document.getElementById('settingsModal').classList.remove('show'); });
+    document.getElementById('addHabitBtn').addEventListener('click', () => {
+        settings.habits.push({ emoji:'✅', text:'' }); renderSettingsHabits();
+    });
+
+    // PIN change in settings
+    document.getElementById('savePinBtn').addEventListener('click', () => {
+        const p1 = document.getElementById('newPin1').value;
+        const p2 = document.getElementById('newPin2').value;
+        const msg = document.getElementById('pinMsg');
+        if (!/^\d{4}$/.test(p1)||!/^\d{4}$/.test(p2)) { msg.style.color='var(--clay)'; msg.textContent='Must be exactly 4 digits.'; return; }
+        if (p1!==p2) { msg.style.color='var(--clay)'; msg.textContent="PINs don't match."; return; }
+        settings.pin = btoa(p1);
+        persistToFirestore();
+        msg.style.color='var(--sage)'; msg.textContent='✓ PIN saved and synced.';
+        document.getElementById('newPin1').value=''; document.getElementById('newPin2').value='';
+    });
+
+    // Reset all
+    document.getElementById('resetAllBtn').addEventListener('click', () => {
+        if (!confirm('⚠️ Delete all your logged days? This cannot be undone.')) return;
+        trackerData = {};
+        persistToFirestore();
+        document.getElementById('settingsModal').classList.remove('show');
+        renderStats(); renderCalendar();
+    });
+
+    // Lock
+    document.getElementById('lockBtn').addEventListener('click', () => {
+        if (!settings.pin) {
+            if (!confirm('You have no PIN set. Set one in Settings → Change PIN.\n\nLock anyway (will just show PIN screen)?')) return;
+        }
+        document.getElementById('appWrapper').style.display = 'none';
+        showPinScreen('unlock');
+    });
+
+    // Month nav
+    document.getElementById('prevBtn').addEventListener('click', () => {
+        currentMonth--; if(currentMonth<0){currentMonth=11;currentYear--;} renderCalendar();
+    });
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        currentMonth++; if(currentMonth>11){currentMonth=0;currentYear++;} renderCalendar();
+    });
+
+    // Background photo
+    document.getElementById('photoBtn').addEventListener('click', () => document.getElementById('photoInput').click());
+    document.getElementById('photoInput').addEventListener('change', e => {
+        const file = e.target.files[0]; if(!file) return;
+        const r = new FileReader();
+        r.onload = ev => {
+            applyBg(ev.target.result);
+            settings.bgPhoto = ev.target.result;
+            persistToFirestore();
         };
-        
-        // If no status is selected, we can set default as null = no record, but we still save checkboxes perhaps. But user likely chooses one.
-        // For clarity, if none selected, we keep existing status or set to null.
-        if(!selectedStatus) {
-            // if there was previous status, keep it? better ask? we keep previous or set null? We'll retain previous from existing data.
-            const existing = trackerData[selectedDateStr];
-            if(existing && existing.status) {
-                selectedStatus = existing.status;
-            } else {
-                selectedStatus = null;
-            }
-        }
-        
-        if(!trackerData[selectedDateStr]) trackerData[selectedDateStr] = { checkboxes: { trigger: false, replace: false, repent: false } };
-        trackerData[selectedDateStr].status = selectedStatus;
-        trackerData[selectedDateStr].checkboxes = checkboxesState;
-        saveData();
-        renderCalendar();
-        dayModal.hide();
-    }
-    
-    function clearCurrentDay() {
-        if(confirm(`Clear all records for ${selectedDateStr}? This cannot be undone.`)) {
-            clearDayData(selectedDateStr);
-            dayModal.hide();
-        }
-    }
-    
-    // initialize modal status toggle listeners
-    function initModalEventListeners() {
-        const statusBtns = document.querySelectorAll('#statusToggleGroup button');
-        statusBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const statusVal = btn.getAttribute('data-status');
-                setActiveStatusButton(statusVal);
-            });
-        });
-        
-        saveDayBtn.addEventListener('click', saveCurrentDay);
-        clearDayBtn.addEventListener('click', clearCurrentDay);
-    }
-    
-    // background photo upload (fixed, well positioned)
-    function setupPhotoUpload() {
-        uploadPhotoBtn.addEventListener('click', () => {
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            fileInput.onchange = (e) => {
-                const file = e.target.files[0];
-                if(file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        const imgUrl = ev.target.result;
-                        document.body.style.backgroundImage = `url('${imgUrl}')`;
-                        document.body.style.backgroundSize = "cover";
-                        document.body.style.backgroundPosition = "center center";
-                        document.body.style.backgroundAttachment = "fixed";
-                        // store preference (optional)
-                        localStorage.setItem("JalNasser_Background", imgUrl);
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    alert("Please choose a valid image.");
-                }
-            };
-            fileInput.click();
-        });
-        
-        // load previously saved background if any
-        const savedBg = localStorage.getItem("JalNasser_Background");
-        if(savedBg && savedBg.startsWith('data:image')) {
-            document.body.style.backgroundImage = `url('${savedBg}')`;
-            document.body.style.backgroundSize = "cover";
-            document.body.style.backgroundPosition = "center center";
-            document.body.style.backgroundAttachment = "fixed";
-        } else {
-            // default subtle background (nature/abstract) but user can replace quickly
-            document.body.style.backgroundImage = "url('https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=1950&auto=format')";
-            document.body.style.backgroundSize = "cover";
-            document.body.style.backgroundPosition = "center";
-            document.body.style.backgroundAttachment = "fixed";
-        }
-    }
-    
-    // month navigation
-    function changeMonth(delta) {
-        let newMonth = currentMonth + delta;
-        let newYear = currentYear;
-        if(newMonth < 0) {
-            newMonth = 11;
-            newYear--;
-        } else if(newMonth > 11) {
-            newMonth = 0;
-            newYear++;
-        }
-        currentYear = newYear;
-        currentMonth = newMonth;
-        renderCalendar();
-    }
-    
-    // init everything
-    function init() {
-        loadData();
-        renderCalendar();
-        dayModal = new bootstrap.Modal(dayModalEl);
-        initModalEventListeners();
-        prevMonthBtn.addEventListener('click', () => changeMonth(-1));
-        nextMonthBtn.addEventListener('click', () => changeMonth(1));
-        resetAllDataBtn.addEventListener('click', resetAllData);
-        setupPhotoUpload();
-        
-        // optional: reset data safety message, but we already have confirm
-    }
-    
-    init();
+        r.readAsDataURL(file); e.target.value='';
+    });
+
+    // Avatar
+    document.getElementById('avatarWrap').addEventListener('click', () => document.getElementById('avatarInput').click());
+    document.getElementById('avatarInput').addEventListener('change', e => {
+        const file = e.target.files[0]; if(!file) return;
+        const r = new FileReader();
+        r.onload = ev => {
+            applyAvatar(ev.target.result);
+            settings.avatar = ev.target.result;
+            persistToFirestore();
+        };
+        r.readAsDataURL(file); e.target.value='';
+    });
+
+    // Load bg & avatar from settings if present
+    if (settings.bgPhoto) applyBg(settings.bgPhoto);
+    else applyBg("https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=1950&auto=format");
+    if (settings.avatar) applyAvatar(settings.avatar);
+}
+
 </script>
 </body>
 </html>

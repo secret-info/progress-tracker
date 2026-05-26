@@ -584,12 +584,8 @@
 <div class="app-bg" id="appBg"></div>
 <div class="app-wrapper" id="appWrapper" style="display:none;">
 
-    <!-- Config banner (shown if Firebase not set up) -->
-    <div id="configBanner">
-        ⚠️ <strong>Firebase not configured.</strong> Open this file in a text editor and replace the placeholder values in the <code>firebaseConfig</code> object near the bottom of the file with your own Firebase project credentials.
-        Get them free at <strong>console.firebase.google.com</strong> → Project Settings → Your Apps → Web App.
-        Also enable <strong>Authentication</strong> (Email/Password + Google) and <strong>Firestore Database</strong> in your Firebase project.
-    </div>
+    <!-- Config banner placeholder (hidden) -->
+    <div id="configBanner" style="display:none;"></div>
 
     <!-- Header -->
     <div class="app-header">
@@ -717,14 +713,15 @@
 // ║  Project Settings → Your Apps → Web App → SDK snippet  ║
 // ╚══════════════════════════════════════════════════════════╝
 const firebaseConfig = {
-    apiKey: "AIzaSyADNFLF0LurJoWFP3w6GKTyr4PhZ_Ay6pA",
-    authDomain: "jalnasser-6f49e.firebaseapp.com",
-    projectId: "jalnasser-6f49e",
-    storageBucket: "jalnasser-6f49e.firebasestorage.app",
+    apiKey:            "AIzaSyADNFLF0LurJoWFP3w6GKTyr4PhZ_Ay6pA",
+    authDomain:        "jalnasser-6f49e.firebaseapp.com",
+    projectId:         "jalnasser-6f49e",
+    storageBucket:     "jalnasser-6f49e.firebasestorage.app",
     messagingSenderId: "956871681083",
-    appId: "1:956871681083:web:dd1640177af43a87e2a81e"
+    appId:             "1:956871681083:web:36f057291258b9fae2a81e",
+    measurementId:     "G-HM8VJKJMNE"
 };
-    
+
 // ╔══════════════════════════════════════════════════════════╗
 // ║  STEP 2 — In Firebase Console, enable:                  ║
 // ║   • Authentication → Email/Password (and Google)        ║
@@ -786,6 +783,16 @@ let pinFirst    = '';
 // AUTH STATE
 // ═══════════════════════════════════════════════════════════
 if (CONFIGURED) {
+    // Handle return from Google redirect (mobile)
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js').then(({ getRedirectResult }) => {
+        getRedirectResult(auth).catch(e => {
+            if (e.code && e.code !== 'auth/no-current-user') {
+                const el = document.getElementById('siErr');
+                if (el) el.textContent = friendlyErr(e.code);
+            }
+        });
+    });
+
     onAuthStateChanged(auth, user => {
         if (user) {
             currentUID = user.uid;
@@ -903,8 +910,17 @@ window.doSignUp = async () => {
 
 window.doGoogle = async () => {
     const err = document.getElementById('siErr');
+    err.textContent = '';
     try {
-        await signInWithPopup(auth, new GoogleAuthProvider());
+        const provider = new GoogleAuthProvider();
+        // Mobile browsers block popups — use redirect instead
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+            const { signInWithRedirect } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+            await signInWithRedirect(auth, provider);
+        } else {
+            await signInWithPopup(auth, provider);
+        }
     } catch(e) {
         err.textContent = friendlyErr(e.code);
     }
@@ -1217,23 +1233,25 @@ function loadLocalFallback() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// UI INIT (event listeners — called once app is visible)
+// PIN LISTENERS — attached immediately so pad works on PIN screen
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('.pin-key').forEach(btn => {
+    btn.addEventListener('click', () => handlePinKey(btn.dataset.k));
+});
+document.addEventListener('keydown', e => {
+    if (document.getElementById('pinScreen').classList.contains('visible')) {
+        if (e.key >= '0' && e.key <= '9') handlePinKey(e.key);
+        else if (e.key === 'Backspace') handlePinKey('del');
+        else if (e.key === 'Enter') handlePinKey('enter');
+    }
+});
+
+// ═══════════════════════════════════════════════════════════
+// UI INIT (remaining listeners — called once app is visible)
 // ═══════════════════════════════════════════════════════════
 let uiInited = false;
 function initAppUI() {
     if (uiInited) return; uiInited = true;
-
-    // PIN pad
-    document.querySelectorAll('.pin-key').forEach(btn => {
-        btn.addEventListener('click', () => handlePinKey(btn.dataset.k));
-    });
-    document.addEventListener('keydown', e => {
-        if (document.getElementById('pinScreen').classList.contains('visible')) {
-            if (e.key>='0'&&e.key<='9') handlePinKey(e.key);
-            else if (e.key==='Backspace') handlePinKey('del');
-            else if (e.key==='Enter') handlePinKey('enter');
-        }
-    });
 
     // Status btns toggle
     document.querySelectorAll('.status-btn').forEach(btn => {
